@@ -13,7 +13,7 @@ int main() {
 
     print_board(board);
 
-    place_pieces(board, players);
+    play_game(board, players);
 
     return 0;
 }
