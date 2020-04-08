@@ -62,6 +62,30 @@ bool checkValidMove(square board [BOARD_SIZE][BOARD_SIZE], int fromRow, int from
     }
 }
 
+struct piece*maintainStackSize5(struct piece*tile){
+    //Create a temporary array to store the top 5 pieces from the array
+    square temp[1];
+    //Push the top 5 pieces from the stack to the temp array
+    for(int i = 0; i < 5; i++){
+        temp[0].num_pieces++;
+        temp[0].stack = push(tile->p_color, temp[0].stack);
+        //Remove this piece from the stack
+        tile = pop(tile);
+    }
+    //Get rid of the remaining pieces in the stack
+    while(tile != NULL)
+        tile = pop(tile);
+
+    //Push the elements from the temp array back into the stack
+    for(int i = 0; i < 5; i++){
+        tile = push(temp[0].stack->p_color, tile);
+        temp[0].stack = pop(temp[0].stack);
+        temp[0].num_pieces--;
+    }
+    //Return the new stack
+    return tile;
+}
+
 void displayPiecesOnSquare(struct piece*tile, int size){
     //Base case
     if(size > 0){
@@ -188,6 +212,11 @@ void play_game(square board[BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]
                     //Increment the number of pieces on the square to which the piece is being placed
                     board[toRow][toCol].num_pieces++;
                     board[toRow][toCol].stack = push(board[fromRow][fromCol].stack->p_color, board[toRow][toCol].stack);
+                    if(board[toRow][toCol].num_pieces > 5){
+                        board[toRow][toCol].stack = maintainStackSize5(board[toRow][toCol].stack);
+                        //Update the size of the stack so that it can be accessed by the displayPieces() function
+                        board[toRow][toCol].num_pieces = 5;
+                    }
                     board[fromRow][fromCol].stack = pop(board[fromRow][fromCol].stack);
                     //Decrement the number of pieces from which the piece was moved
                     board[fromRow][fromCol].num_pieces--;

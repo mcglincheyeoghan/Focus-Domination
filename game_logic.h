@@ -25,6 +25,9 @@ bool checkSameColour(square board[BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo,
 //Function to check if the player has made a valid move
 bool checkValidMove(square board [BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo);
 
+//Function to only keep the top 5 pieces of a stack
+struct piece*maintainStackSize5(struct piece*tile);
+
 //Recursive function to display the pieces a particular square on the board
 void displayPiecesOnSquare(struct piece*tile);
 
