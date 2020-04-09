@@ -23,10 +23,13 @@ bool checkEmpty(square board[BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo);
 bool checkSameColour(square board[BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo, player players[PLAYERS_NUM], int playerNumber);
 
 //Function to check if the player has made a valid move
-bool checkValidMove(square board [BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo);
+bool checkValidMove(square board [BOARD_SIZE][BOARD_SIZE], int rowNo, int colNo, int amount);
 
 //Function to only keep the top 5 pieces of a stack
 struct piece*maintainStackSize5(struct piece*tile);
+
+//Function to create a stack of pieces being moved form one square to another
+struct piece*transferStack(square board [BOARD_SIZE][BOARD_SIZE], int fromRow, int fromCol, int numTransferred);
 
 //Recursive function to display the pieces a particular square on the board
 void displayPiecesOnSquare(struct piece*tile);
