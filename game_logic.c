@@ -62,7 +62,7 @@ bool checkValidMove(square board [BOARD_SIZE][BOARD_SIZE], int fromRow, int from
     }
 }
 
-struct piece*maintainStackSize5(struct piece*tile){
+struct piece*maintainStackSize5(struct piece*tile, player players[PLAYERS_NUM], int playerNum){
     //Create a temporary array to store the top 5 pieces from the array
     square temp[1];
     //Push the top 5 pieces from the stack to the temp array
@@ -73,8 +73,15 @@ struct piece*maintainStackSize5(struct piece*tile){
         tile = pop(tile);
     }
     //Get rid of the remaining pieces in the stack
-    while(tile != NULL)
-        tile = pop(tile);
+    while(tile != NULL){
+        if(tile->p_color == players[playerNum].player_color){
+            tile = pop(tile);
+            players[playerNum].numKept++;
+        }else{
+            tile = pop(tile);
+            players[playerNum].numCaptured++;
+        }
+    }
 
     //Push the elements from the temp array back into the stack
     for(int i = 0; i < 5; i++){
@@ -141,6 +148,7 @@ void displayPieces(square board[BOARD_SIZE][BOARD_SIZE]){
     }
 }
 
+//Player with red pieces wins if there are no stacks with green pieces on top on the board
 bool checkREDWins(square board [BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]){
     for(int rowNo = 0; rowNo < BOARD_SIZE; rowNo++){
         for(int colNo = 0; colNo < BOARD_SIZE; colNo++){
@@ -161,6 +169,7 @@ bool checkREDWins(square board [BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_
     return true;
 }
 
+//Player with red pieces wins if there are no stacks with red pieces on top on the board
 bool checkGREENWins(square board [BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]){
     for(int rowNo = 0; rowNo < BOARD_SIZE; rowNo++){
         for(int colNo = 0; colNo < BOARD_SIZE; colNo++){
@@ -181,20 +190,22 @@ bool checkGREENWins(square board [BOARD_SIZE][BOARD_SIZE], player players[PLAYER
     return true;
 }
 
-bool endGame(bool REDWon, bool GREENWon){
-    if(REDWon || GREENWon)
-        return true;
-    else
-        return false;
-}
-
 void play_game(square board[BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]){
     int fromRow, fromCol, numPiecesMoved, toRow, toCol;
+    for(int i = 0; i < PLAYERS_NUM; i++){
+        players[i].numKept = 0;
+        players[i].numCaptured = 0;
+    }
     while(1) {
         for (int i = 0; i < PLAYERS_NUM; i++) {
             if (!checkREDWins(board, players) && !checkGREENWins(board, players)) {
                 //Display all the pieces on the board so that the player can make a better decision as to which stack they wish to move
                 displayPieces(board);
+                //Display the number of reserved and kept pieces of each player one of them has any
+                if(players[0].numKept > 0 || players[0].numCaptured > 0 || players[1].numKept > 0 || players[1].numCaptured > 0){
+                    for(int i = 0; i < PLAYERS_NUM; i++)
+                        printf("%s has %d reserved pieces and has captured %d pieces\n", players[i].name, players[i].numKept, players[i].numCaptured);
+                }
                 while (1) {
                     printf("\n%s, please select the row from which you wish to move a stack\n", players[i].name);
                     scanf("%d", &fromRow);
@@ -251,7 +262,7 @@ void play_game(square board[BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]
                             board[toRow][toCol].num_pieces++;
                             board[toRow][toCol].stack = push(movedPieces[0].stack->p_color, board[toRow][toCol].stack);
                             if(board[toRow][toCol].num_pieces > 5){
-                                board[toRow][toCol].stack = maintainStackSize5(board[toRow][toCol].stack);
+                                board[toRow][toCol].stack = maintainStackSize5(board[toRow][toCol].stack, players, i);
                                 //Update the size of the stack so that it can be accessed by the displayPieces() function
                                 board[toRow][toCol].num_pieces = 5;
                             }
@@ -268,7 +279,7 @@ void play_game(square board[BOARD_SIZE][BOARD_SIZE], player players[PLAYERS_NUM]
                         board[toRow][toCol].num_pieces++;
                         board[toRow][toCol].stack = push(board[fromRow][fromCol].stack->p_color, board[toRow][toCol].stack);
                         if(board[toRow][toCol].num_pieces > 5){
-                            board[toRow][toCol].stack = maintainStackSize5(board[toRow][toCol].stack);
+                            board[toRow][toCol].stack = maintainStackSize5(board[toRow][toCol].stack, players, i);
                             //Update the size of the stack so that it can be accessed by the displayPieces() function
                             board[toRow][toCol].num_pieces = 5;
                         }
